@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>搜索</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: linear-gradient(180deg, #0f0c29, #302b63, #24243e);
+      padding: 60px 20px;
+    }
+    h1 { color: #fff; font-size: 28px; margin-bottom: 32px; }
+    .search-row { display: flex; gap: 10px; width: 100%; max-width: 520px; margin-bottom: 16px; }
+    #kw {
+      flex: 1;
+      padding: 14px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 28px;
+      outline: none;
+      background: rgba(255,255,255,0.95);
+      transition: box-shadow 0.2s;
+    }
+    #kw:focus { box-shadow: 0 0 0 4px rgba(108,92,231,0.3); }
+    #go {
+      padding: 14px 28px;
+      font-size: 15px;
+      border: none;
+      border-radius: 28px;
+      background: linear-gradient(135deg, #6c5ce7, #a363d9);
+      color: #fff;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    #go:hover { opacity: 0.88; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; max-width: 520px; margin-bottom: 28px; }
+    .tag-label { font-size: 13px; color: #8888aa; width: 100%; margin-bottom: 2px; }
+    .tag {
+      padding: 5px 14px;
+      font-size: 13px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.1);
+      color: #ccccee;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.15);
+      transition: all 0.2s;
+    }
+    .tag:hover { background: rgba(108,92,231,0.3); border-color: #6c5ce7; }
+    .results { width: 100%; max-width: 520px; }
+    .stats { font-size: 13px; color: #8888aa; margin-bottom: 10px; }
+    .item {
+      display: flex;
+      gap: 14px;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: all 0.2s;
+    }
+    .item:hover { background: rgba(255,255,255,0.12); border-color: rgba(108,92,231,0.4); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+    .item-body { flex: 1; }
+    .item-title { font-size: 15px; color: #eee; font-weight: 500; }
+    .item-desc { font-size: 13px; color: #8888aa; margin-top: 3px; }
+    .hl { color: #a363d9; font-weight: 600; }
+    .empty { text-align: center; color: #666688; padding: 30px 0; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>🔍 搜索</h1>
+  <div class="search-row">
+    <input id="kw" type="text" placeholder="输入关键词..." autofocus>
+    <button id="go">搜索</button>
+  </div>
+  <div class="tags">
+    <span class="tag-label">热门搜索</span>
+    <span class="tag" onclick="quick('CSS')">CSS</span>
+    <span class="tag" onclick="quick('React')">React</span>
+    <span class="tag" onclick="quick('Python')">Python</span>
+    <span class="tag" onclick="quick('Docker')">Docker</span>
+    <span class="tag" onclick="quick('Git')">Git</span>
+  </div>
+  <div class="results">
+    <div class="stats" id="stats" style="display:none"></div>
+    <div id="list"></div>
+    <div class="empty" id="empty">输入关键词开始搜索</div>
+  </div>
+
+  <script>
+    var data = [
+      { title: 'CSS flexbox 布局指南', desc: '弹性盒模型从入门到实践', color: '#1572b6' },
+      { title: 'React 组件生命周期', desc: 'mount、update、unmount 各阶段详解', color: '#61dafb' },
+      { title: 'React Hooks 实战', desc: 'useState 与 useEffect 的最佳实践', color: '#61dafb' },
+      { title: 'CSS Grid 网格布局', desc: '二维布局的终极解决方案', color: '#1572b6' },
+      { title: 'Python 数据分析', desc: 'Pandas 与 NumPy 入门教程', color: '#3776ab' },
+      { title: 'Python 异步编程', desc: 'asyncio 与 await 的使用方法', color: '#3776ab' },
+      { title: 'Docker 容器化入门', desc: '从 Dockerfile 到 Compose 全流程', color: '#2496ed' },
+      { title: 'Docker 多阶段构建', desc: '优化镜像大小的实用技巧', color: '#2496ed' },
+      { title: 'Git 分支管理', desc: 'Git Flow 与 GitHub Flow 工作流', color: '#f05032' },
+      { title: 'Git rebase 详解', desc: '变基操作与合并冲突处理', color: '#f05032' }
+    ];
+
+    function esc(s) {
+      var d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function hl(text, kw) {
+      var e = esc(text);
+      if (!kw) return e;
+      return e.replace(new RegExp('(' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<span class="hl">$1</span>');
+    }
+
+    function doSearch() {
+      var kw = document.getElementById('kw').value.trim().toLowerCase();
+      var list = document.getElementById('list');
+      var empty = document.getElementById('empty');
+      var stats = document.getElementById('stats');
+
+      list.innerHTML = '';
+
+      if (!kw) {
+        empty.style.display = 'block';
+        empty.textContent = '输入关键词开始搜索';
+        stats.style.display = 'none';
+        return;
+      }
+
+      var results = data.filter(function(item) {
+        return item.title.toLowerCase().indexOf(kw) !== -1 || item.desc.toLowerCase().indexOf(kw) !== -1;
+      });
+
+      if (!results.length) {
+        empty.style.display = 'block';
+        empty.textContent = '未找到与 "' + kw + '" 相关的结果';
+        stats.style.display = 'none';
+        return;
+      }
+
+      empty.style.display = 'none';
+      stats.style.display = 'block';
+      stats.textContent = '找到 ' + results.length + ' 条结果';
+
+      results.forEach(function(item) {
+        var d = document.createElement('div');
+        d.className = 'item';
+        d.innerHTML =
+          '<span class="dot" style="background:' + item.color + '"></span>' +
+          '<div class="item-body">' +
+            '<div class="item-title">' + hl(item.title, kw) + '</div>' +
+            '<div class="item-desc">' + hl(item.desc, kw) + '</div>' +
+          '</div>';
+        list.appendChild(d);
+      });
+    }
+
+    function quick(val) {
+      document.getElementById('kw').value = val;
+      doSearch();
+    }
+
+    document.getElementById('go').addEventListener('click', doSearch);
+    document.getElementById('kw').addEventListener('input', doSearch);
+    document.getElementById('kw').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doSearch();
+    });
+  </script>
+</body>
+</html>
