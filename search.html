@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>搜索</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    .card {
+      background: #fff;
+      padding: 40px 48px;
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 520px;
+    }
+    h1 { color: #333; margin-bottom: 24px; text-align: center; }
+    .search-group { display: flex; gap: 8px; margin-bottom: 20px; }
+    #search-input {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #search-input:focus { border-color: #667eea; }
+    #search-btn {
+      padding: 12px 24px;
+      font-size: 15px;
+      color: #fff;
+      background: #667eea;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #search-btn:hover { background: #556cd6; }
+    #result-list { list-style: none; }
+    .result-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .result-item:last-child { border-bottom: none; }
+    .result-icon { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; margin-right: 14px; flex-shrink: 0; }
+    .result-info { flex: 1; }
+    .result-title { font-size: 15px; color: #333; font-weight: 500; }
+    .result-desc { font-size: 13px; color: #999; margin-top: 2px; }
+    .highlight { color: #764ba2; font-weight: 600; }
+    .empty { text-align: center; color: #bbb; padding: 20px 0; }
+    .count { font-size: 13px; color: #999; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔍 搜索</h1>
+    <div class="search-group">
+      <input id="search-input" type="text" placeholder="输入关键词搜索..." autofocus>
+      <button id="search-btn">搜索</button>
+    </div>
+    <div id="count" class="count" style="display:none"></div>
+    <ul id="result-list"></ul>
+    <div id="empty" class="empty">输入关键词开始搜索</div>
+  </div>
+
+  <script>
+    var data = [
+      { title: 'JavaScript 基础教程', desc: '学习变量、函数、作用域等核心概念', icon: 'JS' },
+      { title: 'CSS flex 布局指南', desc: '掌握 flexbox 弹性盒模型的用法', icon: 'CSS' },
+      { title: 'HTML5 语义化标签', desc: '了解 header、nav、article 等语义元素', icon: 'H5' },
+      { title: 'React 入门指南', desc: '从组件到 Hooks 的完整学习路径', icon: 'Re' },
+      { title: 'Vue 3 组合式 API', desc: 'composition API 的核心用法与最佳实践', icon: 'Vu' },
+      { title: 'Node.js 后端开发', desc: '使用 Express 搭建 RESTful API 服务', icon: 'No' },
+      { title: 'Git 版本控制', desc: '分支管理、合并冲突与协作工作流', icon: 'Git' },
+      { title: 'Webpack 构建工具', desc: '打包、压缩与开发服务器配置详解', icon: 'Wp' },
+      { title: 'TypeScript 类型系统', desc: '泛型、接口与高级类型技巧', icon: 'TS' },
+      { title: 'Python 数据分析', desc: '使用 Pandas 和 NumPy 处理数据', icon: 'Py' }
+    ];
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function highlight(text, keyword) {
+      var escaped = escapeHtml(text);
+      if (!keyword) return escaped;
+      var reg = new RegExp('(' + keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      return escaped.replace(reg, '<span class="highlight">$1</span>');
+    }
+
+    function search() {
+      var keyword = document.getElementById('search-input').value.trim();
+      var list = document.getElementById('result-list');
+      var empty = document.getElementById('empty');
+      var count = document.getElementById('count');
+
+      list.innerHTML = '';
+
+      if (!keyword) {
+        empty.style.display = 'block';
+        empty.textContent = '输入关键词开始搜索';
+        count.style.display = 'none';
+        return;
+      }
+
+      var results = data.filter(function(item) {
+        return item.title.toLowerCase().indexOf(keyword.toLowerCase()) !== -1 ||
+               item.desc.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
+      });
+
+      if (results.length === 0) {
+        empty.style.display = 'block';
+        empty.textContent = '没有找到与 "' + keyword + '" 相关的结果';
+        count.style.display = 'none';
+        return;
+      }
+
+      empty.style.display = 'none';
+      count.style.display = 'block';
+      count.textContent = '找到 ' + results.length + ' 条结果';
+
+      results.forEach(function(item) {
+        var li = document.createElement('li');
+        li.className = 'result-item';
+        li.innerHTML =
+          '<div class="result-icon">' + item.icon + '</div>' +
+          '<div class="result-info">' +
+            '<div class="result-title">' + highlight(item.title, keyword) + '</div>' +
+            '<div class="result-desc">' + highlight(item.desc, keyword) + '</div>' +
+          '</div>';
+        list.appendChild(li);
+      });
+    }
+
+    document.getElementById('search-btn').addEventListener('click', search);
+    document.getElementById('search-input').addEventListener('input', search);
+    document.getElementById('search-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') search();
+    });
+  </script>
+</body>
+</html>
