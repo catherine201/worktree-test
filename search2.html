@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>搜索 - 高级版</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+      background: #f0f2f5;
+      padding: 40px 20px;
+    }
+    .container { max-width: 640px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 28px; }
+    .header h1 { font-size: 24px; color: #1a1d29; margin-bottom: 6px; }
+    .header p { font-size: 14px; color: #999; }
+
+    .search-box {
+      position: relative;
+      margin-bottom: 16px;
+    }
+    #search-input {
+      width: 100%;
+      padding: 14px 48px 14px 18px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      outline: none;
+      transition: all 0.2s;
+      background: #fff;
+    }
+    #search-input:focus { border-color: #4f6ef7; box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.1); }
+    .search-icon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #bbb;
+      font-size: 18px;
+      pointer-events: none;
+    }
+
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0; right: 0;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      z-index: 10;
+      display: none;
+      overflow: hidden;
+    }
+    .suggestion-item {
+      padding: 10px 18px;
+      font-size: 14px;
+      color: #555;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .suggestion-item:hover { background: #f5f6ff; color: #4f6ef7; }
+
+    .filters { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-btn {
+      padding: 6px 16px;
+      font-size: 13px;
+      border: 1px solid #e0e0e0;
+      border-radius: 20px;
+      background: #fff;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover { border-color: #4f6ef7; color: #4f6ef7; }
+    .filter-btn.active { background: #4f6ef7; border-color: #4f6ef7; color: #fff; }
+
+    .stats { font-size: 13px; color: #999; margin-bottom: 12px; }
+
+    .result-list { list-style: none; }
+    .result-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 18px;
+      background: #fff;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      transition: box-shadow 0.2s;
+    }
+    .result-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .result-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .result-body { flex: 1; min-width: 0; }
+    .result-title { font-size: 15px; color: #1a1d29; font-weight: 500; margin-bottom: 4px; }
+    .result-desc { font-size: 13px; color: #888; line-height: 1.5; }
+    .result-tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 6px;
+      color: #4f6ef7;
+      background: rgba(79, 110, 247, 0.1);
+    }
+    .highlight { color: #4f6ef7; font-weight: 600; background: rgba(79,110,247,0.08); border-radius: 2px; padding: 0 2px; }
+    .empty { text-align: center; color: #bbb; padding: 40px 0; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 高级搜索</h1>
+      <p>输入关键词，支持分类筛选和搜索建议</p>
+    </div>
+
+    <div class="search-box">
+      <input id="search-input" type="text" placeholder="搜索文章、教程、工具..." autofocus>
+      <span class="search-icon">🔍</span>
+      <div class="suggestions" id="suggestions"></div>
+    </div>
+
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-cat="all">全部</button>
+      <button class="filter-btn" data-cat="frontend">前端</button>
+      <button class="filter-btn" data-cat="backend">后端</button>
+      <button class="filter-btn" data-cat="tool">工具</button>
+      <button class="filter-btn" data-cat="language">语言</button>
+    </div>
+
+    <div class="stats" id="stats" style="display:none"></div>
+    <ul class="result-list" id="result-list"></ul>
+    <div class="empty" id="empty">输入关键词开始搜索</div>
+  </div>
+
+  <script>
+    var data = [
+      { title: 'JavaScript 闭包详解', desc: '深入理解闭包原理及其在实际开发中的应用', cat: 'frontend', icon: 'JS', color: '#f7df1e' },
+      { title: 'CSS Grid 布局完全指南', desc: '掌握网格布局从入门到精通的所有技巧', cat: 'frontend', icon: 'CSS', color: '#1572b6' },
+      { title: 'React Hooks 最佳实践', desc: 'useState、useEffect 等核心 Hooks 使用指南', cat: 'frontend', icon: 'Re', color: '#61dafb' },
+      { title: 'Vue 3 响应式原理', desc: 'Proxy 与 ref 的底层实现机制解析', cat: 'frontend', icon: 'Vu', color: '#42b883' },
+      { title: 'Node.js Express 框架教程', desc: '使用 Express 快速搭建 RESTful API', cat: 'backend', icon: 'No', color: '#68a063' },
+      { title: 'Python Flask Web 开发', desc: '从零搭建 Flask 应用并部署上线', cat: 'backend', icon: 'Py', color: '#3776ab' },
+      { title: 'Docker 容器化部署指南', desc: '编写 Dockerfile 并使用 Compose 编排服务', cat: 'tool', icon: 'Dk', color: '#2496ed' },
+      { title: 'Git 分支管理策略', desc: 'Git Flow、GitHub Flow 工作流对比与实践', cat: 'tool', icon: 'Git', color: '#f05032' },
+      { title: 'Webpack 构建优化', desc: '代码分割、Tree Shaking 与缓存策略详解', cat: 'tool', icon: 'Wp', color: '#1d63ed' },
+      { title: 'TypeScript 高级类型', desc: '泛型、映射类型与条件类型深入解析', cat: 'language', icon: 'TS', color: '#3178c6' },
+      { title: 'Python 数据分析入门', desc: 'Pandas DataFrame 操作与数据可视化', cat: 'language', icon: 'Py', color: '#3776ab' },
+      { title: 'Go 语言并发编程', desc: 'goroutine 与 channel 的使用与原理', cat: 'language', icon: 'Go', color: '#00add8' }
+    ];
+
+    var catLabels = { frontend: '前端', backend: '后端', tool: '工具', language: '语言' };
+    var currentCat = 'all';
+
+    function escapeHtml(s) {
+      var d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function highlight(text, kw) {
+      var escaped = escapeHtml(text);
+      if (!kw) return escaped;
+      var reg = new RegExp('(' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      return escaped.replace(reg, '<span class="highlight">$1</span>');
+    }
+
+    function search() {
+      var kw = document.getElementById('search-input').value.trim().toLowerCase();
+      var list = document.getElementById('result-list');
+      var empty = document.getElementById('empty');
+      var stats = document.getElementById('stats');
+
+      list.innerHTML = '';
+
+      var filtered = data.filter(function(item) {
+        if (currentCat !== 'all' && item.cat !== currentCat) return false;
+        if (!kw) return true;
+        return item.title.toLowerCase().indexOf(kw) !== -1 || item.desc.toLowerCase().indexOf(kw) !== -1;
+      });
+
+      if (filtered.length === 0) {
+        empty.style.display = 'block';
+        empty.textContent = kw ? '没有找到与 "' + kw + '" 相关的结果' : '该分类下暂无内容';
+        stats.style.display = 'none';
+        return;
+      }
+
+      empty.style.display = 'none';
+      stats.style.display = 'block';
+      stats.textContent = '共 ' + filtered.length + ' 条结果' + (kw ? ' · 关键词：' + kw : '');
+
+      filtered.forEach(function(item) {
+        var li = document.createElement('li');
+        li.className = 'result-item';
+        li.innerHTML =
+          '<div class="result-icon" style="background:' + item.color + '">' + item.icon + '</div>' +
+          '<div class="result-body">' +
+            '<div class="result-title">' + highlight(item.title, kw) + '</div>' +
+            '<div class="result-desc">' + highlight(item.desc, kw) + '</div>' +
+            '<span class="result-tag">' + catLabels[item.cat] + '</span>' +
+          '</div>';
+        list.appendChild(li);
+      });
+    }
+
+    function updateSuggestions() {
+      var kw = document.getElementById('search-input').value.trim().toLowerCase();
+      var box = document.getElementById('suggestions');
+      if (!kw) { box.style.display = 'none'; return; }
+
+      var matches = data.filter(function(item) {
+        return item.title.toLowerCase().indexOf(kw) !== -1;
+      }).slice(0, 5);
+
+      if (matches.length === 0) { box.style.display = 'none'; return; }
+
+      box.innerHTML = '';
+      matches.forEach(function(item) {
+        var div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.textContent = item.title;
+        div.addEventListener('click', function() {
+          document.getElementById('search-input').value = item.title;
+          box.style.display = 'none';
+          search();
+        });
+        box.appendChild(div);
+      });
+      box.style.display = 'block';
+    }
+
+    var input = document.getElementById('search-input');
+    input.addEventListener('input', function() { updateSuggestions(); search(); });
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') { document.getElementById('suggestions').style.display = 'none'; }
+    });
+
+    document.getElementById('filters').addEventListener('click', function(e) {
+      var btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+      document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentCat = btn.dataset.cat;
+      search();
+    });
+
+    search();
+  </script>
+</body>
+</html>
