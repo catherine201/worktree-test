@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sidebar</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; display: flex; height: 100vh; background: #f0f2f5; }
+    .sidebar { width: 240px; background: #1a1d29; color: #a0a3b1; height: 100%; display: flex; flex-direction: column; transition: width 0.3s ease; overflow: hidden; }
+    .sidebar.collapsed { width: 64px; }
+    .sidebar-header { padding: 20px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #2a2d3a; }
+    .logo { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #4f6ef7, #6c5ce7); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+    .sidebar-title { font-size: 15px; font-weight: 600; color: #fff; white-space: nowrap; }
+    .toggle-btn { margin-left: auto; background: none; border: none; color: #6b6e7d; cursor: pointer; font-size: 18px; padding: 4px; transition: color 0.2s; }
+    .toggle-btn:hover { color: #fff; }
+    .sidebar.collapsed .sidebar-title, .sidebar.collapsed .menu-text, .sidebar.collapsed .toggle-btn { opacity: 0; }
+    .sidebar-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+    .sidebar-nav::-webkit-scrollbar { width: 4px; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background: #3a3d4a; border-radius: 2px; }
+    .menu-group { margin-bottom: 8px; }
+    .menu-label { padding: 8px 20px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #555867; }
+    .sidebar.collapsed .menu-label { text-align: center; padding: 8px 0; font-size: 0; }
+    .sidebar.collapsed .menu-label::before { content: "···"; font-size: 12px; }
+    .menu-item { display: flex; align-items: center; gap: 12px; padding: 10px 20px; cursor: pointer; transition: all 0.2s; position: relative; white-space: nowrap; }
+    .menu-item:hover { background: rgba(79, 110, 247, 0.1); color: #fff; }
+    .menu-item.active { background: rgba(79, 110, 247, 0.15); color: #4f6ef7; }
+    .menu-item.active::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #4f6ef7; border-radius: 0 2px 2px 0; }
+    .menu-icon { width: 20px; text-align: center; flex-shrink: 0; font-size: 16px; }
+    .menu-text { font-size: 14px; }
+    .sidebar-footer { padding: 12px 16px; border-top: 1px solid #2a2d3a; display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #e17055, #fdcb6e); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 13px; }
+    .user-info { overflow: hidden; }
+    .user-name { font-size: 13px; color: #e0e0e0; font-weight: 500; }
+    .user-role { font-size: 11px; color: #6b6e7d; }
+    .sidebar.collapsed .user-info { opacity: 0; }
+    .main { flex: 1; padding: 24px; }
+    .main h1 { font-size: 20px; color: #1a1d29; margin-bottom: 12px; }
+    .main p { color: #555; line-height: 1.6; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">K</div>
+      <span class="sidebar-title">控制台</span>
+      <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="menu-group">
+        <div class="menu-label">概览</div>
+        <div class="menu-item active"><span class="menu-icon">🏠</span><span class="menu-text">仪表盘</span></div>
+        <div class="menu-item"><span class="menu-icon">📊</span><span class="menu-text">数据分析</span></div>
+      </div>
+      <div class="menu-group">
+        <div class="menu-label">管理</div>
+        <div class="menu-item"><span class="menu-icon">👥</span><span class="menu-text">用户管理</span></div>
+        <div class="menu-item"><span class="menu-icon">📦</span><span class="menu-text">商品列表</span></div>
+        <div class="menu-item"><span class="menu-icon">🛒</span><span class="menu-text">订单管理</span></div>
+        <div class="menu-item"><span class="menu-icon">🏷️</span><span class="menu-text">分类标签</span></div>
+      </div>
+      <div class="menu-group">
+        <div class="menu-label">系统</div>
+        <div class="menu-item"><span class="menu-icon">⚙️</span><span class="menu-text">系统设置</span></div>
+        <div class="menu-item"><span class="menu-icon">🔔</span><span class="menu-text">通知中心</span></div>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Admin</div>
+        <div class="user-role">管理员</div>
+      </div>
+    </div>
+  </aside>
+  <main class="main">
+    <h1>仪表盘</h1>
+    <p>点击左上角按钮可折叠/展开侧边栏。</p>
+  </main>
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    }
+    document.querySelectorAll('.menu-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.menu-item').forEach(function(i) { i.classList.remove('active'); });
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
