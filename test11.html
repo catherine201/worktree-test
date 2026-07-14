@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>待办事项</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    .card {
+      background: #fff;
+      padding: 40px 48px;
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 420px;
+    }
+    h1 { color: #333; margin-bottom: 24px; text-align: center; }
+    .input-group { display: flex; gap: 8px; margin-bottom: 20px; }
+    #todo-input {
+      flex: 1;
+      padding: 10px 14px;
+      font-size: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #todo-input:focus { border-color: #667eea; }
+    #add-btn {
+      padding: 10px 20px;
+      font-size: 15px;
+      color: #fff;
+      background: #667eea;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #add-btn:hover { background: #556cd6; }
+    ul { list-style: none; }
+    li {
+      display: flex;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    li:last-child { border-bottom: none; }
+    li input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-right: 12px;
+      cursor: pointer;
+      accent-color: #764ba2;
+    }
+    li span { flex: 1; font-size: 15px; color: #333; }
+    li.done span { text-decoration: line-through; color: #aaa; }
+    li button {
+      padding: 4px 12px;
+      font-size: 13px;
+      color: #e74c3c;
+      background: transparent;
+      border: 1px solid #e74c3c;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    li button:hover { background: #e74c3c; color: #fff; }
+    .empty { text-align: center; color: #bbb; padding: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>待办事项</h1>
+    <div class="input-group">
+      <input id="todo-input" type="text" placeholder="输入待办事项..." onkeydown="if(event.key==='Enter')addTodo()">
+      <button id="add-btn" onclick="addTodo()">添加</button>
+    </div>
+    <ul id="todo-list"></ul>
+    <div id="empty" class="empty">暂无待办事项</div>
+  </div>
+
+  <script>
+    let todos = [];
+
+    function addTodo() {
+      const input = document.getElementById('todo-input');
+      const text = input.value.trim();
+      if (!text) return;
+      todos.push({ text, done: false });
+      input.value = '';
+      render();
+    }
+
+    function toggleTodo(index) {
+      todos[index].done = !todos[index].done;
+      render();
+    }
+
+    function deleteTodo(index) {
+      todos.splice(index, 1);
+      render();
+    }
+
+    function render() {
+      const list = document.getElementById('todo-list');
+      const empty = document.getElementById('empty');
+      list.innerHTML = '';
+      if (todos.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+      todos.forEach((todo, i) => {
+        const li = document.createElement('li');
+        if (todo.done) li.classList.add('done');
+        li.innerHTML = `
+          <input type="checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTodo(${i})">
+          <span>${todo.text}</span>
+          <button onclick="deleteTodo(${i})">删除</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    render();
+  </script>
+</body>
+</html>
