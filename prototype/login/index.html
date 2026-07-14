@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 - 企业管理平台</title>
+  <style>
+    :root {
+      --brand-primary: #2970ff;
+      --brand-gradient: linear-gradient(135deg, #2970ff, #2cbdff);
+      --brand-deep-navy: #0d172e;
+      --brand-cyan: #2cbdff;
+      --brand-ice: #eef5ff;
+      --text-primary: #1a2332;
+      --text-secondary: #6b7686;
+      --text-muted: #9ba3b0;
+      --bg-white: #ffffff;
+      --bg-light: #f5f7fa;
+      --border-color: #e2e6eb;
+      --border-focus: #2970ff;
+      --error-color: #e5484d;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --shadow-card: 0 4px 24px rgba(13, 23, 46, 0.06);
+      --shadow-input-focus: 0 0 0 3px rgba(41, 112, 255, 0.12);
+      --transition: 0.2s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg-light);
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ===== 左侧品牌展示区 ===== */
+    .brand-panel {
+      flex: 1 1 480px;
+      max-width: 600px;
+      background: var(--brand-deep-navy);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px 56px;
+      color: #fff;
+    }
+
+    .brand-panel::before {
+      content: "";
+      position: absolute;
+      top: -120px;
+      right: -120px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(41, 112, 255, 0.35), transparent 70%);
+      border-radius: 50%;
+    }
+
+    .brand-panel::after {
+      content: "";
+      position: absolute;
+      bottom: -100px;
+      left: -60px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(44, 189, 255, 0.2), transparent 70%);
+      border-radius: 50%;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-logo .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--brand-gradient);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #fff;
+    }
+
+    .brand-hero {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-hero h1 {
+      font-size: 30px;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 16px;
+    }
+
+    .brand-hero p {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.6);
+      max-width: 380px;
+      line-height: 1.7;
+    }
+
+    .brand-features {
+      display: flex;
+      gap: 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .feature-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .feature-item .num {
+      font-size: 28px;
+      font-weight: 700;
+      background: var(--brand-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .feature-item .label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    /* ===== 右侧表单区 ===== */
+    .form-panel {
+      flex: 1 1 420px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 32px;
+      background: var(--bg-white);
+    }
+
+    .form-container {
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .form-header {
+      margin-bottom: 32px;
+    }
+
+    .form-header h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .form-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px;
+      font-size: 14px;
+      color: var(--text-primary);
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-input:focus {
+      border-color: var(--border-focus);
+      background: var(--bg-white);
+      box-shadow: var(--shadow-input-focus);
+    }
+
+    .form-input.error {
+      border-color: var(--error-color);
+      box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.12);
+    }
+
+    .form-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      user-select: none;
+    }
+
+    .checkbox-wrapper input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--brand-primary);
+      cursor: pointer;
+    }
+
+    .link {
+      color: var(--brand-primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: opacity var(--transition);
+    }
+
+    .link:hover { opacity: 0.8; }
+
+    .btn-login {
+      width: 100%;
+      height: 44px;
+      border: none;
+      border-radius: var(--radius-md);
+      background: var(--brand-gradient);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity var(--transition), transform var(--transition);
+    }
+
+    .btn-login:hover { opacity: 0.92; }
+    .btn-login:active { transform: scale(0.98); }
+
+    .form-footer {
+      margin-top: 32px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .form-footer a {
+      color: var(--brand-primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .error-msg {
+      display: none;
+      font-size: 12px;
+      color: var(--error-color);
+      margin-top: 6px;
+    }
+
+    .error-msg.show { display: block; }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 900px) {
+      .brand-panel {
+        display: none;
+      }
+      .form-panel {
+        flex: 1 1 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .form-panel {
+        padding: 24px 20px;
+      }
+      .form-header h2 { font-size: 20px; }
+    }
+
+    @media (max-height: 600px) {
+      .form-panel {
+        align-items: flex-start;
+        overflow-y: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 左侧品牌展示区 -->
+  <aside class="brand-panel">
+    <div class="brand-logo">
+      <span class="logo-mark">K</span>
+      <span>金蝶云·星空</span>
+    </div>
+    <div class="brand-hero">
+      <h1>连接企业<br>每一个管理场景</h1>
+      <p>面向成长型企业的云端管理平台，涵盖财务、供应链、生产制造、人力资源等核心业务领域。</p>
+    </div>
+    <div class="brand-features">
+      <div class="feature-item">
+        <span class="num">800W+</span>
+        <span class="label">服务客户</span>
+      </div>
+      <div class="feature-item">
+        <span class="num">30+</span>
+        <span class="label">行业方案</span>
+      </div>
+      <div class="feature-item">
+        <span class="num">99.9%</span>
+        <span class="label">服务可用性</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 右侧登录表单 -->
+  <main class="form-panel">
+    <div class="form-container">
+      <div class="form-header">
+        <h2>欢迎登录</h2>
+        <p>请输入您的账号信息</p>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="username">账号</label>
+          <div class="input-wrapper">
+            <input type="text" id="username" name="username" class="form-input" placeholder="请输入用户名或手机号" autocomplete="username" />
+          </div>
+          <div class="error-msg" id="usernameError">请输入账号</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">密码</label>
+          <div class="input-wrapper">
+            <input type="password" id="password" name="password" class="form-input" placeholder="请输入密码" autocomplete="current-password" />
+          </div>
+          <div class="error-msg" id="passwordError">请输入密码</div>
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="remember" />
+            <span>记住账号</span>
+          </label>
+          <a href="javascript:void(0)" class="link">忘记密码？</a>
+        </div>
+
+        <button type="submit" class="btn-login">登 录</button>
+      </form>
+
+      <div class="form-footer">
+        还没有账号？<a href="javascript:void(0)">立即注册</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (function() {
+      var form = document.getElementById('loginForm');
+      var usernameInput = document.getElementById('username');
+      var passwordInput = document.getElementById('password');
+      var usernameError = document.getElementById('usernameError');
+      var passwordError = document.getElementById('passwordError');
+
+      function clearError(input, errorEl) {
+        if (input) input.classList.remove('error');
+        if (errorEl) errorEl.classList.remove('show');
+      }
+
+      function showError(input, errorEl) {
+        if (input) input.classList.add('error');
+        if (errorEl) errorEl.classList.add('show');
+      }
+
+      if (usernameInput) {
+        usernameInput.addEventListener('input', function() {
+          clearError(usernameInput, usernameError);
+        });
+      }
+      if (passwordInput) {
+        passwordInput.addEventListener('input', function() {
+          clearError(passwordInput, passwordError);
+        });
+      }
+
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var valid = true;
+          var uVal = usernameInput ? usernameInput.value.trim() : '';
+          var pVal = passwordInput ? passwordInput.value.trim() : '';
+
+          if (!uVal) {
+            showError(usernameInput, usernameError);
+            valid = false;
+          } else {
+            clearError(usernameInput, usernameError);
+          }
+
+          if (!pVal) {
+            showError(passwordInput, passwordError);
+            valid = false;
+          } else {
+            clearError(passwordInput, passwordError);
+          }
+
+          if (valid) {
+            var btn = document.querySelector('.btn-login');
+            if (btn) {
+              btn.textContent = '登录中...';
+              btn.disabled = true;
+              setTimeout(function() {
+                btn.textContent = '登 录';
+                btn.disabled = false;
+                alert('登录成功（原型演示）');
+              }, 1200);
+            }
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
