@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>番茄钟</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            padding-top: 60px;
+        }
+        .pomodoro-container {
+            background-color: white;
+            padding: 40px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .mode-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+        .mode-tab {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mode-tab.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .timer-display {
+            font-size: 72px;
+            font-weight: 300;
+            color: #333;
+            margin-bottom: 30px;
+            font-variant-numeric: tabular-nums;
+        }
+        .timer-display.break {
+            color: #28a745;
+        }
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .control-button {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .start-button {
+            background-color: #007bff;
+            color: white;
+        }
+        .start-button:hover {
+            background-color: #0056b3;
+        }
+        .start-button.running {
+            background-color: #ffc107;
+        }
+        .start-button.running:hover {
+            background-color: #e0a800;
+        }
+        .reset-button {
+            background-color: #e9ecef;
+            color: #333;
+        }
+        .reset-button:hover {
+            background-color: #dee2e6;
+        }
+        .session-info {
+            margin-top: 24px;
+            color: #888;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="pomodoro-container">
+        <div class="mode-tabs">
+            <button class="mode-tab active" id="workTab" onclick="switchMode('work')">专注 25:00</button>
+            <button class="mode-tab" id="breakTab" onclick="switchMode('break')">休息 05:00</button>
+        </div>
+        <div class="timer-display" id="timer">25:00</div>
+        <div class="timer-controls">
+            <button class="control-button start-button" id="startButton" onclick="toggleTimer()">开始</button>
+            <button class="control-button reset-button" onclick="resetTimer()">重置</button>
+        </div>
+        <div class="session-info" id="sessionInfo">已完成 0 个番茄钟</div>
+    </div>
+
+    <script>
+        var MODES = {
+            work: 25 * 60,
+            break: 5 * 60
+        };
+        var currentMode = 'work';
+        var remaining = MODES.work;
+        var running = false;
+        var intervalId = null;
+        var completedSessions = 0;
+
+        function formatTime(seconds) {
+            var m = Math.floor(seconds / 60);
+            var s = seconds % 60;
+            return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+        }
+
+        function updateDisplay() {
+            var display = document.getElementById('timer');
+            display.textContent = formatTime(remaining);
+            document.title = formatTime(remaining) + (running ? ' - 番茄钟' : ' - 番茄钟');
+        }
+
+        function toggleTimer() {
+            if (running) {
+                clearInterval(intervalId);
+                running = false;
+                setButtonText('继续');
+            } else {
+                running = true;
+                setButtonText('暂停');
+                intervalId = setInterval(tick, 1000);
+            }
+        }
+
+        function setButtonText(text) {
+            var btn = document.getElementById('startButton');
+            btn.textContent = text;
+            btn.classList.toggle('running', running);
+        }
+
+        function tick() {
+            remaining--;
+            if (remaining <= 0) {
+                clearInterval(intervalId);
+                running = false;
+                setButtonText('开始');
+                if (currentMode === 'work') {
+                    completedSessions++;
+                    document.getElementById('sessionInfo').textContent = '已完成 ' + completedSessions + ' 个番茄钟';
+                    switchMode('break');
+                } else {
+                    switchMode('work');
+                }
+                alert(currentMode === 'work' ? '休息结束，开始专注吧！' : '专注完成，休息一下吧！');
+                return;
+            }
+            updateDisplay();
+        }
+
+        function switchMode(mode) {
+            if (running) {
+                clearInterval(intervalId);
+                running = false;
+                setButtonText('开始');
+            }
+            currentMode = mode;
+            remaining = MODES[mode];
+            document.getElementById('workTab').classList.toggle('active', mode === 'work');
+            document.getElementById('breakTab').classList.toggle('active', mode === 'break');
+            var display = document.getElementById('timer');
+            display.classList.toggle('break', mode === 'break');
+            updateDisplay();
+        }
+
+        function resetTimer() {
+            if (running) {
+                clearInterval(intervalId);
+                running = false;
+                setButtonText('开始');
+            }
+            remaining = MODES[currentMode];
+            updateDisplay();
+        }
+
+        updateDisplay();
+    </script>
+</body>
+</html>
