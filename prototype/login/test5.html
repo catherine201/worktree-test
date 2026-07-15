@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注册 - 企业管理平台</title>
+  <style>
+    :root {
+      --brand-primary: #2970ff;
+      --brand-gradient: linear-gradient(135deg, #2970ff, #2cbdff);
+      --text-primary: #1a2332;
+      --text-secondary: #6b7686;
+      --text-muted: #9ba3b0;
+      --bg-white: #ffffff;
+      --bg-light: #f5f7fa;
+      --border-color: #e2e6eb;
+      --border-focus: #2970ff;
+      --error-color: #e5484d;
+      --success-color: #30a14e;
+      --radius-md: 10px;
+      --shadow-card: 0 4px 24px rgba(13, 23, 46, 0.06);
+      --shadow-input-focus: 0 0 0 3px rgba(41, 112, 255, 0.12);
+      --transition: 0.2s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg-light);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .register-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      padding: 40px 32px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--brand-gradient);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .form-header {
+      margin-bottom: 24px;
+    }
+
+    .form-header h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .form-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px;
+      font-size: 14px;
+      color: var(--text-primary);
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+
+    .form-input::placeholder { color: var(--text-muted); }
+
+    .form-input:focus {
+      border-color: var(--border-focus);
+      background: var(--bg-white);
+      box-shadow: var(--shadow-input-focus);
+    }
+
+    .form-input.error {
+      border-color: var(--error-color);
+      box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.12);
+    }
+
+    .form-input.success {
+      border-color: var(--success-color);
+    }
+
+    .error-msg {
+      display: none;
+      font-size: 12px;
+      color: var(--error-color);
+      margin-top: 6px;
+    }
+
+    .error-msg.show { display: block; }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    .btn-register {
+      width: 100%;
+      height: 44px;
+      border: none;
+      border-radius: var(--radius-md);
+      background: var(--brand-gradient);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity var(--transition), transform var(--transition);
+    }
+
+    .btn-register:hover { opacity: 0.92; }
+    .btn-register:active { transform: scale(0.98); }
+
+    .form-footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .form-footer a {
+      color: var(--brand-primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .agreement {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .agreement input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--brand-primary);
+      cursor: pointer;
+      margin-top: 2px;
+    }
+
+    .agreement a {
+      color: var(--brand-primary);
+      text-decoration: none;
+    }
+
+    .password-strength {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    .strength-bar {
+      flex: 1;
+      height: 4px;
+      background: var(--border-color);
+      border-radius: 2px;
+      transition: background var(--transition);
+    }
+
+    .strength-bar.active { background: var(--brand-primary); }
+    .strength-bar.strong { background: var(--success-color); }
+
+    .strength-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="register-card">
+    <div class="logo">
+      <span class="logo-mark">K</span>
+      <span>金蝶云·星空</span>
+    </div>
+
+    <div class="form-header">
+      <h2>创建账号</h2>
+      <p>填写以下信息完成注册</p>
+    </div>
+
+    <form id="registerForm" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="username">用户名</label>
+        <input type="text" id="username" name="username" class="form-input" placeholder="请输入用户名" autocomplete="username" />
+        <div class="error-msg" id="usernameError">请输入用户名</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="phone">手机号</label>
+        <input type="tel" id="phone" name="phone" class="form-input" placeholder="请输入手机号" autocomplete="tel" />
+        <div class="error-msg" id="phoneError">请输入有效的手机号</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">邮箱</label>
+        <input type="email" id="email" name="email" class="form-input" placeholder="请输入邮箱" autocomplete="email" />
+        <div class="error-msg" id="emailError">请输入有效的邮箱地址</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">密码</label>
+        <input type="password" id="password" name="password" class="form-input" placeholder="请设置密码（至少6位）" autocomplete="new-password" />
+        <div class="password-strength">
+          <div class="strength-bar" id="bar1"></div>
+          <div class="strength-bar" id="bar2"></div>
+          <div class="strength-bar" id="bar3"></div>
+        </div>
+        <div class="strength-text" id="strengthText"></div>
+        <div class="error-msg" id="passwordError">密码至少需要6位</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="confirmPassword">确认密码</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" placeholder="请再次输入密码" autocomplete="new-password" />
+        <div class="error-msg" id="confirmError">两次输入的密码不一致</div>
+      </div>
+
+      <label class="agreement">
+        <input type="checkbox" id="agree" />
+        <span>我已阅读并同意 <a href="javascript:void(0)">用户协议</a> 和 <a href="javascript:void(0)">隐私政策</a></span>
+      </label>
+
+      <button type="submit" class="btn-register">注 册</button>
+    </form>
+
+    <div class="form-footer">
+      已有账号？<a href="test2.html">立即登录</a>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var form = document.getElementById('registerForm');
+      var username = document.getElementById('username');
+      var phone = document.getElementById('phone');
+      var email = document.getElementById('email');
+      var password = document.getElementById('password');
+      var confirmPassword = document.getElementById('confirmPassword');
+      var agree = document.getElementById('agree');
+
+      function showError(input, errorId) {
+        input.classList.add('error');
+        document.getElementById(errorId).classList.add('show');
+      }
+
+      function clearError(input, errorId) {
+        input.classList.remove('error');
+        document.getElementById(errorId).classList.remove('show');
+      }
+
+      function isValidPhone(val) {
+        return /^1[3-9]\d{9}$/.test(val);
+      }
+
+      function isValidEmail(val) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+      }
+
+      function updateStrength() {
+        var val = password.value;
+        var len = val.length;
+        var bar1 = document.getElementById('bar1');
+        var bar2 = document.getElementById('bar2');
+        var bar3 = document.getElementById('bar3');
+        var text = document.getElementById('strengthText');
+        var score = 0;
+
+        bar1.className = 'strength-bar';
+        bar2.className = 'strength-bar';
+        bar3.className = 'strength-bar';
+
+        if (len >= 6) score++;
+        if (len >= 10) score++;
+        if (/[A-Z]/.test(val) && /[0-9]/.test(val)) score++;
+
+        if (score === 0) {
+          text.textContent = '';
+        } else if (score === 1) {
+          bar1.classList.add('active');
+          text.textContent = '弱';
+          text.style.color = '#e5484d';
+        } else if (score === 2) {
+          bar1.classList.add('active');
+          bar2.classList.add('active');
+          text.textContent = '中';
+          text.style.color = '#f5a623';
+        } else {
+          bar1.classList.add('active', 'strong');
+          bar2.classList.add('active', 'strong');
+          bar3.classList.add('active', 'strong');
+          text.textContent = '强';
+          text.style.color = '#30a14e';
+        }
+      }
+
+      [username, phone, email, password, confirmPassword].forEach(function(input) {
+        input.addEventListener('input', function() {
+          clearError(input, input.id + 'Error');
+        });
+      });
+
+      password.addEventListener('input', updateStrength);
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var valid = true;
+
+        if (!username.value.trim()) {
+          showError(username, 'usernameError');
+          valid = false;
+        }
+
+        if (!isValidPhone(phone.value.trim())) {
+          showError(phone, 'phoneError');
+          valid = false;
+        }
+
+        if (!isValidEmail(email.value.trim())) {
+          showError(email, 'emailError');
+          valid = false;
+        }
+
+        if (password.value.length < 6) {
+          showError(password, 'passwordError');
+          valid = false;
+        }
+
+        if (password.value !== confirmPassword.value || !confirmPassword.value) {
+          showError(confirmPassword, 'confirmError');
+          valid = false;
+        }
+
+        if (!agree.checked) {
+          alert('请同意用户协议');
+          valid = false;
+        }
+
+        if (valid) {
+          var btn = document.querySelector('.btn-register');
+          btn.textContent = '注册中...';
+          btn.disabled = true;
+          setTimeout(function() {
+            btn.textContent = '注 册';
+            btn.disabled = false;
+            alert('注册成功（原型演示）');
+          }, 1200);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
