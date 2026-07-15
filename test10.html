@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>天气预报</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 30px 16px;
+  }
+  .weather-card {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 32px 28px;
+    color: #fff;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+  .city-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .city-tab {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: transparent;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all .2s;
+  }
+  .city-tab:hover { background: rgba(255,255,255,0.1); }
+  .city-tab.active {
+    background: rgba(255,255,255,0.9);
+    color: #764ba2;
+    font-weight: 600;
+    border-color: transparent;
+  }
+  .current-weather { text-align: center; margin-bottom: 28px; }
+  .current-weather .city-name { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .current-weather .date { font-size: 13px; opacity: 0.7; margin-bottom: 16px; }
+  .current-weather .icon { font-size: 64px; line-height: 1; margin-bottom: 8px; }
+  .current-weather .temp { font-size: 56px; font-weight: 300; line-height: 1; }
+  .current-weather .desc { font-size: 16px; opacity: 0.85; margin-top: 4px; }
+  .details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .detail-item {
+    text-align: center;
+    padding: 12px 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 14px;
+  }
+  .detail-item .label { font-size: 12px; opacity: 0.6; margin-bottom: 4px; }
+  .detail-item .value { font-size: 16px; font-weight: 600; }
+  .forecast-title { font-size: 14px; opacity: 0.7; margin-bottom: 12px; }
+  .forecast {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .forecast-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 14px;
+  }
+  .forecast-item .day { font-size: 14px; width: 60px; }
+  .forecast-item .f-icon { font-size: 22px; }
+  .forecast-item .f-desc { font-size: 13px; opacity: 0.7; width: 80px; text-align: center; }
+  .forecast-item .f-temp { font-size: 14px; width: 80px; text-align: right; }
+  .forecast-item .f-temp .low { opacity: 0.5; margin-left: 6px; }
+</style>
+</head>
+<body>
+
+<div class="weather-card">
+  <div class="city-tabs" id="cityTabs"></div>
+  <div class="current-weather">
+    <div class="city-name" id="cityName"></div>
+    <div class="date" id="dateStr"></div>
+    <div class="icon" id="curIcon"></div>
+    <div class="temp" id="curTemp"></div>
+    <div class="desc" id="curDesc"></div>
+  </div>
+  <div class="details">
+    <div class="detail-item"><div class="label">湿度</div><div class="value" id="humidity"></div></div>
+    <div class="detail-item"><div class="label">风速</div><div class="value" id="wind"></div></div>
+    <div class="detail-item"><div class="label">空气</div><div class="value" id="aqi"></div></div>
+  </div>
+  <div class="forecast-title">未来5天预报</div>
+  <div class="forecast" id="forecast"></div>
+</div>
+
+<script>
+const weatherIcons = {
+  晴: '☀️',
+  多云: '⛅',
+  阴: '☁️',
+  小雨: '🌦️',
+  中雨: '🌧️',
+  大雨: '⛈️',
+  雷阵雨: '🌩️',
+  雪: '❄️',
+};
+
+const cities = [
+  {
+    name: '北京',
+    cur: { temp: 28, desc: '晴', humidity: '45%', wind: '东南3级', aqi: '良' },
+    forecast: [
+      { day: '明天', icon: '多云', desc: '多云', high: 30, low: 21 },
+      { day: '后天', icon: '小雨', desc: '小雨', high: 26, low: 19 },
+      { day: '周四', icon: '阴', desc: '阴', high: 27, low: 20 },
+      { day: '周五', icon: '晴', desc: '晴', high: 31, low: 22 },
+      { day: '周六', icon: '多云', desc: '多云', high: 29, low: 21 },
+    ],
+  },
+  {
+    name: '上海',
+    cur: { temp: 31, desc: '多云', humidity: '68%', wind: '东风4级', aqi: '优' },
+    forecast: [
+      { day: '明天', icon: '小雨', desc: '小雨', high: 28, low: 24 },
+      { day: '后天', icon: '中雨', desc: '中雨', high: 26, low: 23 },
+      { day: '周四', icon: '阴', desc: '阴', high: 27, low: 23 },
+      { day: '周五', icon: '多云', desc: '多云', high: 30, low: 24 },
+      { day: '周六', icon: '晴', desc: '晴', high: 33, low: 25 },
+    ],
+  },
+  {
+    name: '广州',
+    cur: { temp: 33, desc: '雷阵雨', humidity: '75%', wind: '南风3级', aqi: '良' },
+    forecast: [
+      { day: '明天', icon: '大雨', desc: '大雨', high: 30, low: 25 },
+      { day: '后天', icon: '中雨', desc: '中雨', high: 31, low: 25 },
+      { day: '周四', icon: '多云', desc: '多云', high: 34, low: 26 },
+      { day: '周五', icon: '晴', desc: '晴', high: 35, low: 27 },
+      { day: '周六', icon: '雷阵雨', desc: '雷阵雨', high: 32, low: 26 },
+    ],
+  },
+  {
+    name: '成都',
+    cur: { temp: 26, desc: '阴', humidity: '72%', wind: '微风', aqi: '轻度污染' },
+    forecast: [
+      { day: '明天', icon: '小雨', desc: '小雨', high: 25, low: 20 },
+      { day: '后天', icon: '阴', desc: '阴', high: 27, low: 20 },
+      { day: '周四', icon: '多云', desc: '多云', high: 28, low: 21 },
+      { day: '周五', icon: '晴', desc: '晴', high: 30, low: 22 },
+      { day: '周六', icon: '多云', desc: '多云', high: 29, low: 22 },
+    ],
+  },
+  {
+    name: '哈尔滨',
+    cur: { temp: 19, desc: '多云', humidity: '52%', wind: '北风4级', aqi: '优' },
+    forecast: [
+      { day: '明天', icon: '小雨', desc: '小雨', high: 18, low: 12 },
+      { day: '后天', icon: '阴', desc: '阴', high: 17, low: 11 },
+      { day: '周四', icon: '多云', desc: '多云', high: 20, low: 13 },
+      { day: '周五', icon: '晴', desc: '晴', high: 23, low: 15 },
+      { day: '周六', icon: '多云', desc: '多云', high: 22, low: 14 },
+    ],
+  },
+];
+
+function getDateStr() {
+  const d = new Date();
+  const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  return `${d.getMonth() + 1}月${d.getDate()}日 ${weekDays[d.getDay()]}`;
+}
+
+function renderCity(index) {
+  const city = cities[index];
+  document.getElementById('cityName').textContent = city.name;
+  document.getElementById('dateStr').textContent = getDateStr();
+  document.getElementById('curIcon').textContent = weatherIcons[city.cur.desc] || '🌤️';
+  document.getElementById('curTemp').textContent = city.cur.temp + '°';
+  document.getElementById('curDesc').textContent = city.cur.desc;
+  document.getElementById('humidity').textContent = city.cur.humidity;
+  document.getElementById('wind').textContent = city.cur.wind;
+  document.getElementById('aqi').textContent = city.cur.aqi;
+
+  const fc = document.getElementById('forecast');
+  fc.innerHTML = city.forecast.map(function (f) {
+    return '<div class="forecast-item">'
+      + '<div class="day">' + f.day + '</div>'
+      + '<div class="f-icon">' + (weatherIcons[f.icon] || '🌤️') + '</div>'
+      + '<div class="f-desc">' + f.desc + '</div>'
+      + '<div class="f-temp">' + f.high + '°<span class="low">' + f.low + '°</span></div>'
+      + '</div>';
+  }).join('');
+}
+
+const tabs = document.getElementById('cityTabs');
+tabs.innerHTML = cities.map(function (c, i) {
+  return '<button class="city-tab' + (i === 0 ? ' active' : '') + '" data-idx="' + i + '">' + c.name + '</button>';
+}).join('');
+
+tabs.addEventListener('click', function (e) {
+  const btn = e.target.closest('.city-tab');
+  if (!btn) return;
+  document.querySelectorAll('.city-tab').forEach(function (t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  renderCity(parseInt(btn.dataset.idx));
+});
+
+renderCity(0);
+</script>
+</body>
+</html>
