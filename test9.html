@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简易计算器</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .calculator {
+            background-color: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 320px;
+        }
+        .display {
+            background-color: #1c1c1c;
+            color: #fff;
+            font-size: 36px;
+            text-align: right;
+            padding: 16px 20px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            overflow: hidden;
+            word-break: break-all;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .btn {
+            padding: 16px;
+            font-size: 18px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            background-color: #e8e8e8;
+            color: #333;
+        }
+        .btn:hover {
+            background-color: #d0d0d0;
+        }
+        .btn.op {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn.op:hover {
+            background-color: #0056b3;
+        }
+        .btn.eq {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn.eq:hover {
+            background-color: #1e7e34;
+ }
+        .btn.clear {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn.clear:hover {
+            background-color: #bd2130;
+        }
+        .btn.wide {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button class="btn clear wide" onclick="clearAll()">清空</button>
+            <button class="btn op" onclick="inputOp('/')">÷</button>
+            <button class="btn op" onclick="inputOp('*')">×</button>
+            <button class="btn" onclick="inputNum('7')">7</button>
+            <button class="btn" onclick="inputNum('8')">8</button>
+            <button class="btn" onclick="inputNum('9')">9</button>
+            <button class="btn op" onclick="inputOp('-')">-</button>
+            <button class="btn" onclick="inputNum('4')">4</button>
+            <button class="btn" onclick="inputNum('5')">5</button>
+            <button class="btn" onclick="inputNum('6')">6</button>
+            <button class="btn op" onclick="inputOp('+')">+</button>
+            <button class="btn" onclick="inputNum('1')">1</button>
+            <button class="btn" onclick="inputNum('2')">2</button>
+            <button class="btn" onclick="inputNum('3')">3</button>
+            <button class="btn eq wide" onclick="calculate()">=</button>
+            <button class="btn" onclick="inputNum('0')">0</button>
+            <button class="btn" onclick="inputDot()">.</button>
+        </div>
+    </div>
+
+    <script>
+        var current = '0';
+        var previous = null;
+        var operator = null;
+        var justCalculated = false;
+
+        function updateDisplay() {
+            document.getElementById('display').textContent = current;
+        }
+
+        function inputNum(num) {
+            if (current === '0' || justCalculated) {
+                current = num;
+                justCalculated = false;
+            } else {
+                current += num;
+            }
+            updateDisplay();
+        }
+
+        function inputDot() {
+            if (justCalculated) {
+                current = '0.';
+                justCalculated = false;
+            } else if (current.indexOf('.') === -1) {
+                current += '.';
+            }
+            updateDisplay();
+        }
+
+        function inputOp(op) {
+            if (operator !== null && !justCalculated) {
+                calculate();
+            }
+            previous = current;
+            operator = op;
+            justCalculated = false;
+            current = '0';
+        }
+
+        function calculate() {
+            if (operator === null || previous === null) return;
+            var a = parseFloat(previous);
+            var b = parseFloat(current);
+            var result;
+            switch (operator) {
+                case '+': result = a + b; break;
+                case '-': result = a - b; break;
+                case '*': result = a * b; break;
+                case '/':
+                    if (b === 0) {
+                        current = '错误';
+                        operator = null;
+                        previous = null;
+                        justCalculated = true;
+                        updateDisplay();
+                        return;
+                    }
+                    result = a / b;
+                    break;
+            }
+            current = String(Math.round(result * 1e10) / 1e10);
+            operator = null;
+            previous = null;
+            justCalculated = true;
+            updateDisplay();
+        }
+
+        function clearAll() {
+            current = '0';
+            previous = null;
+            operator = null;
+            justCalculated = false;
+            updateDisplay();
+        }
+
+        document.addEventListener('keydown', function(e) {
+            var key = e.key;
+            if (key >= '0' && key <= '9') inputNum(key);
+            else if (key === '.') inputDot();
+            else if (key === '+' || key === '-' || key === '*' || key === '/') inputOp(key);
+            else if (key === 'Enter' || key === '=') { e.preventDefault(); calculate(); }
+            else if (key === 'Escape') clearAll();
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>
