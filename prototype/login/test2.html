@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 - 企业管理平台</title>
+  <style>
+    :root {
+      --brand-primary: #2970ff;
+      --brand-gradient: linear-gradient(135deg, #2970ff, #2cbdff);
+      --brand-deep-navy: #0d172e;
+      --brand-cyan: #2cbdff;
+      --text-primary: #1a2332;
+      --text-secondary: #6b7686;
+      --text-muted: #9ba3b0;
+      --bg-white: #ffffff;
+      --bg-light: #f5f7fa;
+      --border-color: #e2e6eb;
+      --border-focus: #2970ff;
+      --error-color: #e5484d;
+      --radius-md: 10px;
+      --shadow-card: 0 4px 24px rgba(13, 23, 46, 0.06);
+      --shadow-input-focus: 0 0 0 3px rgba(41, 112, 255, 0.12);
+      --transition: 0.2s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg-light);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--bg-white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      padding: 40px 32px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--brand-gradient);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .form-header {
+      margin-bottom: 24px;
+    }
+
+    .form-header h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .form-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px;
+      font-size: 14px;
+      color: var(--text-primary);
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+
+    .form-input::placeholder { color: var(--text-muted); }
+
+    .form-input:focus {
+      border-color: var(--border-focus);
+      background: var(--bg-white);
+      box-shadow: var(--shadow-input-focus);
+    }
+
+    .form-input.error {
+      border-color: var(--error-color);
+      box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.12);
+    }
+
+    .error-msg {
+      display: none;
+      font-size: 12px;
+      color: var(--error-color);
+      margin-top: 6px;
+    }
+
+    .error-msg.show { display: block; }
+
+    .form-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      user-select: none;
+    }
+
+    .checkbox-wrapper input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--brand-primary);
+      cursor: pointer;
+    }
+
+    .link {
+      color: var(--brand-primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .link:hover { opacity: 0.8; }
+
+    .btn-login {
+      width: 100%;
+      height: 44px;
+      border: none;
+      border-radius: var(--radius-md);
+      background: var(--brand-gradient);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity var(--transition), transform var(--transition);
+    }
+
+    .btn-login:hover { opacity: 0.92; }
+    .btn-login:active { transform: scale(0.98); }
+
+    .form-footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .form-footer a {
+      color: var(--brand-primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="logo">
+      <span class="logo-mark">K</span>
+      <span>金蝶云·星空</span>
+    </div>
+
+    <div class="form-header">
+      <h2>欢迎登录</h2>
+      <p>请输入您的账号信息</p>
+    </div>
+
+    <form id="loginForm" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="username">账号</label>
+        <input type="text" id="username" name="username" class="form-input" placeholder="请输入用户名或手机号" autocomplete="username" />
+        <div class="error-msg" id="usernameError">请输入账号</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">密码</label>
+        <input type="password" id="password" name="password" class="form-input" placeholder="请输入密码" autocomplete="current-password" />
+        <div class="error-msg" id="passwordError">请输入密码</div>
+      </div>
+
+      <div class="form-options">
+        <label class="checkbox-wrapper">
+          <input type="checkbox" id="remember" />
+          <span>记住账号</span>
+        </label>
+        <a href="javascript:void(0)" class="link">忘记密码？</a>
+      </div>
+
+      <button type="submit" class="btn-login">登 录</button>
+    </form>
+
+    <div class="form-footer">
+      还没有账号？<a href="javascript:void(0)">立即注册</a>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var form = document.getElementById('loginForm');
+      var usernameInput = document.getElementById('username');
+      var passwordInput = document.getElementById('password');
+      var usernameError = document.getElementById('usernameError');
+      var passwordError = document.getElementById('passwordError');
+
+      function clearError(input, errorEl) {
+        if (input) input.classList.remove('error');
+        if (errorEl) errorEl.classList.remove('show');
+      }
+
+      function showError(input, errorEl) {
+        if (input) input.classList.add('error');
+        if (errorEl) errorEl.classList.add('show');
+      }
+
+      usernameInput.addEventListener('input', function() {
+        clearError(usernameInput, usernameError);
+      });
+
+      passwordInput.addEventListener('input', function() {
+        clearError(passwordInput, passwordError);
+      });
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var valid = true;
+
+        if (!usernameInput.value.trim()) {
+          showError(usernameInput, usernameError);
+          valid = false;
+        } else {
+          clearError(usernameInput, usernameError);
+        }
+
+        if (!passwordInput.value.trim()) {
+          showError(passwordInput, passwordError);
+          valid = false;
+        } else {
+          clearError(passwordInput, passwordError);
+        }
+
+        if (valid) {
+          var btn = document.querySelector('.btn-login');
+          btn.textContent = '登录中...';
+          btn.disabled = true;
+          setTimeout(function() {
+            btn.textContent = '登 录';
+            btn.disabled = false;
+            alert('登录成功（原型演示）');
+          }, 1200);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
