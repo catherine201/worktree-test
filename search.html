@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>搜索</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f5f7;
+    color: #1d1d1f;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 60px 20px;
+  }
+  .container { width: 100%; max-width: 640px; }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 24px; text-align: center; }
+  .search-box {
+    position: relative;
+    margin-bottom: 28px;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    background: #fff;
+  }
+  .search-box input:focus { border-color: #0071e3; }
+  .search-box input::placeholder { color: #999; }
+  .stats {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 16px;
+    text-align: right;
+  }
+  .list { display: flex; flex-direction: column; gap: 10px; }
+  .item {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    transition: box-shadow 0.2s;
+  }
+  .item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .item .title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .item .desc { font-size: 14px; color: #666; line-height: 1.5; }
+  .item .tag {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 2px 10px;
+    font-size: 12px;
+    color: #0071e3;
+    background: #e8f0fe;
+    border-radius: 4px;
+  }
+  mark {
+    background: #ffe066;
+    color: inherit;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+  .empty {
+    text-align: center;
+    color: #999;
+    padding: 40px 0;
+    font-size: 15px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>搜索</h1>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="输入关键词搜索..." autofocus>
+  </div>
+  <div class="stats" id="stats">共 12 条结果</div>
+  <div class="list" id="list"></div>
+</div>
+<script>
+const data = [
+  { title: 'JavaScript 基础教程', desc: '从零开始学习 JavaScript 编程语言，涵盖变量、函数、对象等核心概念。', tag: '教程' },
+  { title: 'React 入门指南', desc: '深入浅出介绍 React 框架的核心思想，包括组件、状态管理和生命周期。', tag: '框架' },
+  { title: 'CSS 布局技巧', desc: '掌握 Flexbox 和 Grid 布局，轻松实现各种复杂的页面布局方案。', tag: '样式' },
+  { title: 'Node.js 后端开发', desc: '使用 JavaScript 构建高性能后端服务，学习 Express 和数据库操作。', tag: '后端' },
+  { title: 'TypeScript 类型系统', desc: '理解 TypeScript 的类型注解、泛型和接口，提升代码质量。', tag: '类型' },
+  { title: 'Vue 3 组合式 API', desc: '探索 Vue 3 的组合式 API，编写更优雅、可复用的组件逻辑。', tag: '框架' },
+  { title: 'Git 版本控制', desc: '学习 Git 的基本操作和分支策略，高效管理项目代码。', tag: '工具' },
+  { title: 'Docker 容器化部署', desc: '掌握 Docker 的基本使用，实现应用的容器化构建和部署。', tag: '运维' },
+  { title: 'Python 数据分析', desc: '使用 Pandas 和 Matplotlib 进行数据清洗、分析和可视化。', tag: '数据' },
+  { title: '算法与数据结构', desc: '系统学习常见算法和数据结构，提升编程解题能力。', tag: '算法' },
+  { title: 'Linux 命令行', desc: '掌握常用的 Linux 命令和 Shell 脚本，提高开发效率。', tag: '工具' },
+  { title: '网络安全基础', desc: '了解常见的 Web 安全漏洞和防护措施，构建安全的应用。', tag: '安全' },
+];
+
+function highlight(text, keyword) {
+  if (!keyword) return text;
+  const re = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  return text.replace(re, '<mark>$1</mark>');
+}
+
+function render() {
+  const q = document.getElementById('searchInput').value.trim();
+  const filtered = q ? data.filter(d =>
+    d.title.toLowerCase().includes(q.toLowerCase()) ||
+    d.desc.toLowerCase().includes(q.toLowerCase()) ||
+    d.tag.toLowerCase().includes(q.toLowerCase())
+  ) : data;
+
+  document.getElementById('stats').textContent = `共 ${filtered.length} 条结果`;
+  const list = document.getElementById('list');
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty">未找到相关结果</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(d => `
+    <div class="item">
+      <div class="title">${highlight(d.title, q)}</div>
+      <div class="desc">${highlight(d.desc, q)}</div>
+      <span class="tag">${highlight(d.tag, q)}</span>
+    </div>
+  `).join('');
+}
+
+document.getElementById('searchInput').addEventListener('input', render);
+render();
+</script>
+</body>
+</html>
