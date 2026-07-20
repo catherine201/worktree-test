@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>轮播Banner</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f5f7;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+  }
+  .banner {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    height: 320px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  }
+  .slides {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s ease;
+  }
+  .slide {
+    min-width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    text-align: center;
+  }
+  .slide h2 { font-size: 30px; font-weight: 700; margin-bottom: 10px; }
+  .slide p { font-size: 16px; opacity: 0.92; }
+  .slide:nth-child(1) { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .slide:nth-child(2) { background: linear-gradient(135deg, #f093fb, #f5576c); }
+  .slide:nth-child(3) { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+  .arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.7);
+    color: #333;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .arrow:hover { background: rgba(255,255,255,0.95); }
+  .arrow.prev { left: 14px; }
+  .arrow.next { right: 14px; }
+  .dots {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .dot.active { background: #fff; }
+</style>
+</head>
+<body>
+  <div class="banner" id="banner">
+    <div class="slides" id="slides">
+      <div class="slide"><h2>灵基 AI</h2><p>让工作更轻松</p></div>
+      <div class="slide"><h2>金蝶云</h2><p>企业级 SaaS 解决方案</p></div>
+      <div class="slide"><h2>高效协作</h2><p>智能开发，快速交付</p></div>
+    </div>
+    <button class="arrow prev" onclick="move(-1)">&#10094;</button>
+    <button class="arrow next" onclick="move(1)">&#10095;</button>
+    <div class="dots" id="dots"></div>
+  </div>
+
+<script>
+  var slides = document.getElementById('slides');
+  var total = slides.children.length;
+  var current = 0;
+  var timer = null;
+
+  var dotsEl = document.getElementById('dots');
+  for (var i = 0; i < total; i++) {
+    (function(idx) {
+      var dot = document.createElement('button');
+      dot.className = 'dot' + (idx === 0 ? ' active' : '');
+      dot.onclick = function() { goTo(idx); };
+      dotsEl.appendChild(dot);
+    })(i);
+  }
+
+  function update() {
+    slides.style.transform = 'translateX(-' + current * 100 + '%)';
+    var dots = dotsEl.children;
+    for (var i = 0; i < dots.length; i++) {
+      dots[i].className = 'dot' + (i === current ? ' active' : '');
+    }
+  }
+
+  function move(dir) {
+    current = (current + dir + total) % total;
+    update();
+    reset();
+  }
+
+  function goTo(idx) {
+    current = idx;
+    update();
+    reset();
+  }
+
+  function start() { timer = setInterval(function() { move(1); }, 3000); }
+  function reset() { clearInterval(timer); start(); }
+
+  var banner = document.getElementById('banner');
+  banner.addEventListener('mouseenter', function() { clearInterval(timer); });
+  banner.addEventListener('mouseleave', start);
+
+  start();
+</script>
+</body>
+</html>
