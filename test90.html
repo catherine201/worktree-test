@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>待办清单</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 16px;
+  }
+  .app {
+    width: 100%;
+    max-width: 520px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 28px 24px;
+  }
+  .header h1 { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+  .header .date { font-size: 13px; opacity: 0.85; }
+  .header .count { margin-top: 12px; font-size: 13px; opacity: 0.9; }
+  .input-bar {
+    display: flex;
+    gap: 8px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .input-bar input {
+    flex: 1;
+    border: 2px solid #e8e8e8;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-bar input:focus { border-color: #667eea; }
+  .input-bar button {
+    background: #667eea;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0 18px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .input-bar button:hover { background: #5568d3; }
+  .filters {
+    display: flex;
+    gap: 4px;
+    padding: 12px 20px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .filters button {
+    background: transparent;
+    border: none;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #888;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .filters button:hover { background: #f5f5f5; }
+  .filters button.active { background: #667eea; color: #fff; }
+  .list { list-style: none; max-height: 420px; overflow-y: auto; }
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid #f5f5f5;
+    transition: background 0.15s;
+  }
+  .item:hover { background: #fafafa; }
+  .item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #667eea;
+    flex-shrink: 0;
+  }
+  .item .text {
+    flex: 1;
+    font-size: 15px;
+    color: #333;
+    word-break: break-word;
+    line-height: 1.4;
+  }
+  .item.done .text { text-decoration: line-through; color: #bbb; }
+  .item .edit-input {
+    flex: 1;
+    border: 2px solid #667eea;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 15px;
+    outline: none;
+  }
+  .item .del {
+    background: transparent;
+    border: none;
+    color: #e0635c;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s;
+    flex-shrink: 0;
+  }
+  .item:hover .del { opacity: 1; }
+  .item .del:hover { background: #fef0f0; }
+  .empty {
+    padding: 48px 20px;
+    text-align: center;
+    color: #ccc;
+    font-size: 14px;
+  }
+  .footer {
+    padding: 12px 20px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #999;
+  }
+  .footer button {
+    background: transparent;
+    border: none;
+    color: #e0635c;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  .footer button:hover { background: #fef0f0; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>待办清单</h1>
+    <div class="date" id="dateStr"></div>
+    <div class="count" id="countStr"></div>
+  </div>
+  <div class="input-bar">
+    <input type="text" id="todoInput" placeholder="添加一个新任务,回车确认..." maxlength="100">
+    <button id="addBtn">添加</button>
+  </div>
+  <div class="filters">
+    <button class="active" data-filter="all">全部</button>
+    <button data-filter="active">未完成</button>
+    <button data-filter="done">已完成</button>
+  </div>
+  <ul class="list" id="todoList"></ul>
+  <div class="footer">
+    <span id="leftCount">0 项剩余</span>
+    <button id="clearDone">清除已完成</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var STORAGE_KEY = 'test90_todos';
+  var todos = [];
+  var filter = 'all';
+
+  var input = document.getElementById('todoInput');
+  var addBtn = document.getElementById('addBtn');
+  var list = document.getElementById('todoList');
+  var dateStr = document.getElementById('dateStr');
+  var countStr = document.getElementById('countStr');
+  var leftCount = document.getElementById('leftCount');
+  var clearDone = document.getElementById('clearDone');
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      todos = raw ? JSON.parse(raw) : [];
+    } catch (e) { todos = []; }
+  }
+
+  function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+  }
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  function addTodo() {
+    var text = input.value.trim();
+    if (!text) return;
+    todos.push({ id: uid(), text: text, done: false, createdAt: Date.now() });
+    input.value = '';
+    save();
+    render();
+  }
+
+  function toggleTodo(id) {
+    var t = todos.find(function (x) { return x.id === id; });
+    if (t) { t.done = !t.done; save(); render(); }
+  }
+
+  function delTodo(id) {
+    todos = todos.filter(function (x) { return x.id !== id; });
+    save(); render();
+  }
+
+  function editTodo(id, newText) {
+    var t = todos.find(function (x) { return x.id === id; });
+    if (t) {
+      var v = newText.trim();
+      if (v) { t.text = v; } else { delTodo(id); return; }
+      save(); render();
+    }
+  }
+
+  function clearDoneTodos() {
+    todos = todos.filter(function (x) { return !x.done; });
+    save(); render();
+  }
+
+  function filtered() {
+    if (filter === 'active') return todos.filter(function (x) { return !x.done; });
+    if (filter === 'done') return todos.filter(function (x) { return x.done; });
+    return todos;
+  }
+
+  function startEdit(li, item) {
+    var span = li.querySelector('.text');
+    var editInput = document.createElement('input');
+    editInput.type = 'text';
+    editInput.className = 'edit-input';
+    editInput.value = item.text;
+    li.replaceChild(editInput, span);
+    editInput.focus();
+    editInput.select();
+    var committed = false;
+    function commit() {
+      if (committed) return;
+      committed = true;
+      editTodo(item.id, editInput.value);
+    }
+    editInput.addEventListener('blur', commit);
+    editInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { editInput.blur(); }
+      else if (e.key === 'Escape') { committed = true; render(); }
+    });
+  }
+
+  function render() {
+    var items = filtered();
+    list.innerHTML = '';
+    if (items.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = filter === 'all' ? '还没有任务,添加一个吧 ~' :
+                          filter === 'active' ? '没有未完成的任务' : '没有已完成的任务';
+      list.appendChild(empty);
+    } else {
+      items.forEach(function (item) {
+        var li = document.createElement('li');
+        li.className = 'item' + (item.done ? ' done' : '');
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = item.done;
+        cb.addEventListener('change', function () { toggleTodo(item.id); });
+        var span = document.createElement('span');
+        span.className = 'text';
+        span.textContent = item.text;
+        span.addEventListener('dblclick', function () { startEdit(li, item); });
+        var del = document.createElement('button');
+        del.className = 'del';
+        del.textContent = '×';
+        del.title = '删除';
+        del.addEventListener('click', function () { delTodo(item.id); });
+        li.appendChild(cb);
+        li.appendChild(span);
+        li.appendChild(del);
+        list.appendChild(li);
+      });
+    }
+    var total = todos.length;
+    var done = todos.filter(function (x) { return x.done; }).length;
+    var left = total - done;
+    countStr.textContent = '共 ' + total + ' 项 · 已完成 ' + done + ' 项';
+    leftCount.textContent = left + ' 项剩余';
+  }
+
+  function updateDate() {
+    var d = new Date();
+    var weeks = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    dateStr.textContent = d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + weeks[d.getDay()];
+  }
+
+  addBtn.addEventListener('click', addTodo);
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') addTodo();
+  });
+  clearDone.addEventListener('click', clearDoneTodos);
+  document.querySelectorAll('.filters button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.filters button').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      filter = btn.dataset.filter;
+      render();
+    });
+  });
+
+  load();
+  updateDate();
+  render();
+})();
+</script>
+</body>
+</html>
