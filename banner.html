@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banner</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f5f5f7;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .banner {
+    width: 100%;
+    max-width: 900px;
+    height: 360px;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+  }
+  .slides {
+    display: flex;
+    height: 100%;
+    transition: transform 0.5s ease;
+  }
+  .slide {
+    min-width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-align: center;
+    padding: 40px;
+  }
+  .slide h2 { font-size: 32px; font-weight: 700; margin-bottom: 12px; }
+  .slide p { font-size: 16px; opacity: 0.9; max-width: 480px; line-height: 1.6; }
+  .slide .btn {
+    margin-top: 24px;
+    padding: 10px 28px;
+    background: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.5);
+    color: #fff;
+    border-radius: 24px;
+    font-size: 14px;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: background 0.2s;
+  }
+  .slide .btn:hover { background: rgba(255,255,255,0.35); }
+  .s1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .s2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+  .s3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+  .arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.3);
+    color: #fff;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    z-index: 2;
+  }
+  .arrow:hover { background: rgba(0,0,0,0.5); }
+  .arrow.prev { left: 16px; }
+  .arrow.next { right: 16px; }
+  .dots {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .dot.active { background: #fff; }
+</style>
+</head>
+<body>
+<div class="banner">
+  <div class="slides" id="slides">
+    <div class="slide s1">
+      <h2>欢迎来到我们的平台</h2>
+      <p>一站式解决方案，助力你的业务高效增长，开启数字化新篇章。</p>
+      <button class="btn">立即了解</button>
+    </div>
+    <div class="slide s2">
+      <h2>新品重磅上线</h2>
+      <p>全新体验，极速响应，为您带来更智能、更便捷的使用感受。</p>
+      <button class="btn">查看详情</button>
+    </div>
+    <div class="slide s3">
+      <h2>限时优惠活动</h2>
+      <p>即日起至月底，注册即享专属折扣，名额有限，先到先得。</p>
+      <button class="btn">马上参与</button>
+    </div>
+  </div>
+  <button class="arrow prev" onclick="go(-1)">&#8249;</button>
+  <button class="arrow next" onclick="go(1)">&#8250;</button>
+  <div class="dots" id="dots"></div>
+</div>
+<script>
+  var total = 3;
+  var current = 0;
+  var timer = null;
+
+  function renderDots() {
+    var html = '';
+    for (var i = 0; i < total; i++) {
+      html += '<button class="dot' + (i === current ? ' active' : '') + '" onclick="goTo(' + i + ')"></button>';
+    }
+    document.getElementById('dots').innerHTML = html;
+  }
+
+  function update() {
+    document.getElementById('slides').style.transform = 'translateX(-' + (current * 100) + '%)';
+    var dots = document.querySelectorAll('.dot');
+    for (var i = 0; i < dots.length; i++) {
+      dots[i].className = 'dot' + (i === current ? ' active' : '');
+    }
+  }
+
+  function go(dir) {
+    current = (current + dir + total) % total;
+    update();
+    reset();
+  }
+
+  function goTo(i) {
+    current = i;
+    update();
+    reset();
+  }
+
+  function reset() {
+    if (timer) clearInterval(timer);
+    timer = setInterval(function() {
+      current = (current + 1) % total;
+      update();
+    }, 3500);
+  }
+
+  renderDots();
+  reset();
+</script>
+</body>
+</html>
