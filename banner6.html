@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>轮播 Banner</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .banner {
+      position: relative;
+      width: 800px;
+      max-width: 92vw;
+      height: 360px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+    .slides {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s ease;
+    }
+    .slide {
+      flex: 0 0 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 48px 56px;
+      color: #fff;
+    }
+    .slide h2 { font-size: 34px; margin-bottom: 14px; font-weight: 700; }
+    .slide p { font-size: 18px; opacity: 0.92; line-height: 1.6; }
+    .slide .btn {
+      margin-top: 22px;
+      padding: 10px 26px;
+      border: 2px solid #fff;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-size: 15px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: background 0.25s;
+    }
+    .slide .btn:hover { background: rgba(255, 255, 255, 0.3); }
+    .s1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+    .s2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .s3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    .s4 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.25s;
+    }
+    .arrow:hover { background: rgba(0, 0, 0, 0.5); }
+    .arrow.prev { left: 16px; }
+    .arrow.next { right: 16px; }
+    .dots {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 5;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .dot.active { background: #fff; width: 26px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <div class="banner" id="banner">
+    <div class="slides" id="slides">
+      <div class="slide s1">
+        <h2>高效协作</h2>
+        <p>一站式团队协作平台，让沟通更顺畅</p>
+        <button class="btn">立即体验</button>
+      </div>
+      <div class="slide s2">
+        <h2>智能分析</h2>
+        <p>数据驱动决策，洞察业务增长新机遇</p>
+        <button class="btn">查看详情</button>
+      </div>
+      <div class="slide s3">
+        <h2>云端办公</h2>
+        <p>随时随地访问，工作不再受地点限制</p>
+        <button class="btn">免费试用</button>
+      </div>
+      <div class="slide s4">
+        <h2>安全可靠</h2>
+        <p>企业级安全防护，数据资产有保障</p>
+        <button class="btn">了解更多</button>
+      </div>
+    </div>
+    <button class="arrow prev" onclick="move(-1)">&#10094;</button>
+    <button class="arrow next" onclick="move(1)">&#10095;</button>
+    <div class="dots" id="dots"></div>
+  </div>
+
+  <script>
+    var total = 4;
+    var current = 0;
+    var timer = null;
+    var slides = document.getElementById('slides');
+    var dotsBox = document.getElementById('dots');
+
+    for (var i = 0; i < total; i++) {
+      (function (idx) {
+        var d = document.createElement('button');
+        d.className = 'dot' + (idx === 0 ? ' active' : '');
+        d.onclick = function () { go(idx); };
+        dotsBox.appendChild(d);
+      })(i);
+    }
+
+    function render() {
+      slides.style.transform = 'translateX(-' + (current * 100) + '%)';
+      var ds = dotsBox.children;
+      for (var i = 0; i < ds.length; i++) {
+        ds[i].className = 'dot' + (i === current ? ' active' : '');
+      }
+    }
+
+    function go(idx) {
+      current = (idx + total) % total;
+      render();
+      restart();
+    }
+
+    function move(step) { go(current + step); }
+
+    function restart() {
+      if (timer) clearInterval(timer);
+      timer = setInterval(function () { go(current + 1); }, 3500);
+    }
+
+    document.getElementById('banner').addEventListener('mouseenter', function () {
+      if (timer) clearInterval(timer);
+    });
+    document.getElementById('banner').addEventListener('mouseleave', restart);
+
+    restart();
+  </script>
+</body>
+</html>
