@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banner 轮播</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: #f0f2f5; }
+  .banner { position: relative; width: 100%; max-width: 960px; height: 360px; margin: 40px auto; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,.15); }
+  .slides { position: relative; width: 100%; height: 100%; }
+  .slide { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; opacity: 0; transition: opacity .6s ease; }
+  .slide.active { opacity: 1; }
+  .slide h2 { font-size: 32px; margin-bottom: 12px; }
+  .slide p { font-size: 16px; opacity: .9; }
+  .slide:nth-child(1) { background: linear-gradient(135deg, #667eea, #764ba2); }
+  .slide:nth-child(2) { background: linear-gradient(135deg, #f093fb, #f5576c); }
+  .slide:nth-child(3) { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+  .slide:nth-child(4) { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+  .slide:nth-child(5) { background: linear-gradient(135deg, #fa709a, #fee140); }
+  .arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border: none; border-radius: 50%; background: rgba(255,255,255,.35); color: #fff; font-size: 20px; cursor: pointer; z-index: 10; transition: background .2s; }
+  .arrow:hover { background: rgba(255,255,255,.55); }
+  .arrow.prev { left: 16px; }
+  .arrow.next { right: 16px; }
+  .dots { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.45); cursor: pointer; transition: background .2s; }
+  .dot.active { background: #fff; }
+</style>
+</head>
+<body>
+<div class="banner">
+  <div class="slides" id="slides">
+    <div class="slide active"><h2>春日繁花</h2><p>万物复苏，生机盎然</p></div>
+    <div class="slide"><h2>夏日清凉</h2><p>海风习习，碧波荡漾</p></div>
+    <div class="slide"><h2>秋日金黄</h2><p>层林尽染，硕果累累</p></div>
+    <div class="slide"><h2>冬日暖阳</h2><p>银装素裹，温暖如初</p></div>
+    <div class="slide"><h2>四季流转</h2><p>时光荏苒，美好常在</p></div>
+  </div>
+  <button class="arrow prev" id="prev">&#10094;</button>
+  <button class="arrow next" id="next">&#10095;</button>
+  <div class="dots" id="dots"></div>
+</div>
+<script>
+  var slides = document.querySelectorAll('.slide');
+  var dotsContainer = document.getElementById('dots');
+  var current = 0;
+  var timer = null;
+
+  for (var i = 0; i < slides.length; i++) {
+    (function (idx) {
+      var dot = document.createElement('span');
+      dot.className = 'dot' + (idx === 0 ? ' active' : '');
+      dot.onclick = function () { go(idx); reset(); };
+      dotsContainer.appendChild(dot);
+    })(i);
+  }
+  var dots = document.querySelectorAll('.dot');
+
+  function go(idx) {
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = (idx + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+  }
+  function next() { go(current + 1); }
+  function prev() { go(current - 1); }
+  function start() { timer = setInterval(next, 3000); }
+  function reset() { clearInterval(timer); start(); }
+
+  document.getElementById('next').onclick = function () { next(); reset(); };
+  document.getElementById('prev').onclick = function () { prev(); reset(); };
+  start();
+</script>
+</body>
+</html>
