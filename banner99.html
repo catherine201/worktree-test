@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banner99 轮播</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f2f5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .banner {
+    position: relative;
+    width: 900px;
+    max-width: 92vw;
+    height: 420px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  }
+  .slides { display: flex; height: 100%; transition: transform 0.6s ease; }
+  .slide {
+    flex: 0 0 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-align: center;
+  }
+  .slide h2 { font-size: 44px; font-weight: 700; margin-bottom: 12px; letter-spacing: 2px; }
+  .slide p { font-size: 18px; opacity: 0.9; letter-spacing: 1px; }
+  .slide-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .slide-2 { background: linear-gradient(135deg, #f093fb 0%, #d55485 100%); }
+  .slide-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+  .slide-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+  .arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    backdrop-filter: blur(4px);
+  }
+  .arrow:hover { background: rgba(255, 255, 255, 0.6); color: #333; }
+  .arrow.prev { left: 16px; }
+  .arrow.next { right: 16px; }
+
+  .dots {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: #fff; transform: scale(1.25); }
+</style>
+</head>
+<body>
+  <div class="banner" id="banner">
+    <div class="slides" id="slides">
+      <div class="slide slide-1"><h2>高效协作</h2><p>团队工作，触手可及</p></div>
+      <div class="slide slide-2"><h2>智能分析</h2><p>数据洞察，决策无忧</p></div>
+      <div class="slide slide-3"><h2>云端管理</h2><p>随时随地，畅享办公</p></div>
+      <div class="slide slide-4"><h2>安全可靠</h2><p>企业级守护，安心无忧</p></div>
+    </div>
+    <button class="arrow prev" id="prev" aria-label="上一张">&#10094;</button>
+    <button class="arrow next" id="next" aria-label="下一张">&#10095;</button>
+    <div class="dots" id="dots"></div>
+  </div>
+
+<script>
+  const slides = document.getElementById('slides');
+  const dotsWrap = document.getElementById('dots');
+  const total = slides.children.length;
+  let index = 0;
+  let timer = null;
+
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => go(i));
+    dotsWrap.appendChild(dot);
+  }
+
+  function go(i) {
+    index = (i + total) % total;
+    slides.style.transform = `translateX(-${index * 100}%)`;
+    [...dotsWrap.children].forEach((d, idx) => d.classList.toggle('active', idx === index));
+  }
+
+  function next() { go(index + 1); }
+  function prev() { go(index - 1); }
+
+  document.getElementById('next').addEventListener('click', () => { next(); reset(); });
+  document.getElementById('prev').addEventListener('click', () => { prev(); reset(); });
+
+  function start() { timer = setInterval(next, 3000); }
+  function reset() { clearInterval(timer); start(); }
+
+  const banner = document.getElementById('banner');
+  banner.addEventListener('mouseenter', () => clearInterval(timer));
+  banner.addEventListener('mouseleave', start);
+
+  start();
+</script>
+</body>
+</html>
